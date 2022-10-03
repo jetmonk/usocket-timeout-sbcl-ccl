@@ -368,12 +368,11 @@ happen. Use with care."
 
 
 ;; determine if a socket condition indicates operation is in progress
-#-clasp
 (defun %socket-operation-condition-in-progress-p (condition)
   #+sbcl  ;; sbcl defines this condition (also for Windows?)
   (typep condition 'sb-bsd-sockets:operation-in-progress) ;; errno 36 
   ;;
-  #+(or ecl  mkcl) ; MKCL *might* work
+  #+(or ecl mkcl clasp) ; MKCL *might* work, no idea about clasp
   ;; we might expect sb-bsd-sockets in ECL to translate errno to BSD, but it does not.
   ;; on Darwin ECL seems to prefer error 35, which is EWOULDBLOCK, not 36
   ;; so we  allow both
@@ -385,11 +384,10 @@ happen. Use with care."
 	    )))
 
 ;; determine if a socket condition indicates not-connected (yet) status
-#-clasp
 (defun %socket-operation-condition-not-connected-p (condition)
   #+sbcl  ;; sbcl defines this condition (also for Windows?)
   (typep condition 'sb-bsd-sockets:not-connected-error) ;; errno 36 
-  #+(or ecl  mkcl) ; MKCL *might* work
+  #+(or ecl mkcl clasp) ; MKCL *might* work, no idea about CLASP
   ;; we might expect sb-bsd-sockets in ECL to translate errno to BSD, but it does not.
   (member (sb-bsd-sockets::socket-error-errno condition) ;; have to use unexported symbol
 	  '(#-linux 57 ;; should cover darwin and any BSD
