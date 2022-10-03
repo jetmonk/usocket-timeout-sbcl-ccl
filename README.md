@@ -12,7 +12,7 @@ Changes:
      * in `socket-connect` perform a timeout by 
        1. putting socket into nonblocking mode
        2. connecting, and testing for EINPROGRESS (otherwise, error)
-       3. looping with increasing `(SLEEP)` until testing for `(sb-bsd-sockets:socket-peername socket)` doesn't return `ENOTCONN`
+       3. looping with increasing `(SLEEP)` until testing for `(sb-bsd-sockets:socket-peername socket)` doesn't throw error `ENOTCONN`
        
        
 Comments:
