@@ -376,12 +376,13 @@ happen. Use with care."
   ;; we might expect sb-bsd-sockets in ECL to translate errno to BSD, but it does not.
   ;; on Darwin ECL seems to prefer error 35, which is EWOULDBLOCK, not 36
   ;; so we  allow both
-  (member (sb-bsd-sockets::socket-error-errno condition) ;; have to use unexported symbol
-	  '(#-linux 35 #-linux 36  ;; should cover darwin and any BSD
-	    ;; on ECL for Raspberry Pi  (and others?) Linux EINPROGRESS=115 is
-	    ;; not translated correctly to BSD, so we allow code 115 too
-	    #+linux 115 
-	    )))
+  (and (typep condition 'sb-bsd-sockets::socket-error)
+       (member (sb-bsd-sockets::socket-error-errno condition) ;; have to use unexported symbol
+	       '(#-linux 35 #-linux 36  ;; should cover darwin and any BSD
+		 ;; on ECL for Raspberry Pi  (and others?) Linux EINPROGRESS=115 is
+		 ;; not translated correctly to BSD, so we allow code 115 too
+		 #+linux 115 
+		 ))))
 
 ;; determine if a socket condition indicates not-connected (yet) status
 (defun %socket-operation-condition-not-connected-p (condition)
@@ -389,10 +390,11 @@ happen. Use with care."
   (typep condition 'sb-bsd-sockets:not-connected-error) ;; errno 36 
   #+(or ecl mkcl clasp) ; MKCL *might* work, no idea about CLASP
   ;; we might expect sb-bsd-sockets in ECL to translate errno to BSD, but it does not.
-  (member (sb-bsd-sockets::socket-error-errno condition) ;; have to use unexported symbol
-	  '(#-linux 57 ;; should cover darwin and any BSD
-	    ;; on ECL for Raspberry Pi (and others?) Linux ENOTCONN=107 
-	    #+linux 107)))
+  (and (typep condition 'sb-bsd-sockets::socket-error)
+       (member (sb-bsd-sockets::socket-error-errno condition) ;; have to use unexported symbol
+	       '(#-linux 57 ;; should cover darwin and any BSD
+		 ;; on ECL for Raspberry Pi (and others?) Linux ENOTCONN=107 
+		 #+linux 107))))
 
 
 ;; enable the new non-blocking socket method
